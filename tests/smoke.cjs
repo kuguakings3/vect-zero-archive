@@ -31,7 +31,7 @@ const click = selector => {
 
 // Initial render must produce useful content rather than a blank panel.
 assert.ok(content.textContent.trim().length > 100, "Initial page content did not render");
-assert.ok(content.textContent.includes("世界持续运转"), "Overview hero did not render");
+assert.ok(content.textContent.includes("世界持续运转"), "Overview hero did not render. Runtime errors: "+runtimeErrors.join(" | ")+"; visible content: "+content.textContent.slice(0,700));
 
 // Map hierarchy buttons must change the visible node set.
 click('.nav button[data-page="world"]');

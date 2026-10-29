@@ -49,3 +49,17 @@ jobs:
           path: .
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
+      - name: Verify published site
+        run: |
+          set -e
+          for attempt in $(seq 1 12); do
+            status=$(curl -sSL -o /tmp/vect-zero-live.html -w "%{http_code}" https://kuguakings3.github.io/vect-zero-archive/ || true)
+            if [ "$status" = "200" ] && grep -q 'name="archive-build" content="2026-10-29-departure-draft-1"' /tmp/vect-zero-live.html && grep -q 'function departure()' /tmp/vect-zero-live.html; then
+              echo "Published site returned HTTP 200 and contains the current departure draft."
+              exit 0
+            fi
+            echo "Waiting for the latest GitHub Pages content (attempt $attempt; HTTP $status)."
+            sleep 5
+          done
+          echo "Published site did not return the expected current build." >&2
+          exit 1

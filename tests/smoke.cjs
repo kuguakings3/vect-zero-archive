@@ -53,6 +53,9 @@ assert.ok(content.textContent.includes("容量守恒还没有闭环"), "Capacity
 assert.ok(content.textContent.includes("配置变更时机已明确暂缓"), "Capacity review did not preserve the deferred decision");
 assert.equal(doc.querySelector("#page-status-label").textContent, "方向已确认", "Capacity page status label is wrong");
 
+const search = doc.querySelector("#search");
+assert.ok(search, "Global search input is missing");
+
 // Detailed design principles must be expandable, keyboard-semantic, and searchable.
 click('.nav button[data-page="principles"]');
 assert.equal(doc.querySelectorAll("#principle-list details.principle-detail").length, 13, "Design principles page should contain 13 expandable principles");
@@ -84,8 +87,6 @@ click('#content button[data-page="principles"]');
 assert.equal(doc.querySelector("#crumb").textContent, "设计原则", "Capacity review cross-navigation did not open the design manual");
 
 // Global search must find a location and navigate to its detail page.
-const search = doc.querySelector("#search");
-assert.ok(search, "Global search input is missing");
 search.value = "仓储片区";
 search.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
 assert.ok(content.textContent.includes("仓储片区"), "Global search did not return the warehouse location");

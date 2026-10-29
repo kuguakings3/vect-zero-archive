@@ -30,6 +30,7 @@ const click = selector => {
 };
 
 // Initial render must produce useful content rather than a blank panel.
+assert.equal(content.dataset.appReady, "true", "Initial render did not finish. Runtime errors: "+runtimeErrors.join(" | ")+"; visible content: "+content.textContent.slice(0,700));
 assert.ok(content.textContent.trim().length > 100, "Initial page content did not render");
 assert.ok(content.textContent.includes("世界持续运转"), "Overview hero did not render. Runtime errors: "+runtimeErrors.join(" | ")+"; visible content: "+content.textContent.slice(0,700));
 
@@ -39,6 +40,11 @@ click('#content [data-layer="世界"]');
 assert.equal(doc.querySelectorAll("#content [data-location]").length, 3, "World layer should show 3 example nodes");
 click('#content [data-layer="小区域"]');
 assert.equal(doc.querySelectorAll("#content [data-location]").length, 6, "Small-area layer should show all 6 example nodes");
+
+// Departure preparation is a design draft, not an implemented game feature.
+click('.nav button[data-page="departure"]');
+assert.ok(content.textContent.includes("出发准备与装载"), "Departure preparation page did not render");
+assert.ok(content.textContent.includes("容量超限必须显式解决"), "Departure validation rules are missing");
 
 // Global search must find a location and navigate to its detail page.
 const search = doc.querySelector("#search");
@@ -59,6 +65,13 @@ filter.dispatchEvent(new window.Event("input", { bubbles: true }));
 assert.equal(doc.querySelectorAll("#event-rows .event").length, 1, "Timeline filter should return one matching event");
 assert.ok(content.textContent.includes("无线电中断"), "Filtered event title is missing");
 
+// Global search must also route to the new departure draft.
+search.value = "出发准备";
+search.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+assert.ok(content.textContent.includes("出发准备与装载"), "Search did not find departure preparation");
+click('#content [data-hit="0"]');
+assert.equal(doc.querySelector("#crumb").textContent, "出发准备", "Departure search result did not open the new page");
+
 // Scenario selection must update the displayed scenario.
 click('.nav button[data-page="scenarios"]');
 click('#content [data-case="命令延迟"]');
@@ -66,4 +79,4 @@ assert.ok(content.textContent.includes("玩家已经提交了新命令"), "Scena
 
 assert.deepEqual(runtimeErrors, [], `Runtime errors detected: ${runtimeErrors.join(" | ")}`);
 dom.window.close();
-process.stdout.write("PASS: initial render, map layers, global search, timeline filter, scenario selection.\n");
+process.stdout.write("PASS: initial render, map layers, global search, timeline filter, scenario selection, departure draft.\n");

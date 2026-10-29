@@ -46,6 +46,13 @@ click('.nav button[data-page="departure"]');
 assert.ok(content.textContent.includes("出发准备与装载"), "Departure preparation page did not render");
 assert.ok(content.textContent.includes("容量超限必须显式解决"), "Departure validation rules are missing");
 
+// Transport capacity review must separate confirmed direction from unresolved risks.
+click('.nav button[data-page="capacity"]');
+assert.ok(content.textContent.includes("运输容量设计复盘"), "Capacity review page did not render");
+assert.ok(content.textContent.includes("容量守恒还没有闭环"), "Capacity review did not identify the capacity-conservation risk");
+assert.ok(content.textContent.includes("配置变更时机已明确暂缓"), "Capacity review did not preserve the deferred decision");
+assert.equal(doc.querySelector("#page-status-label").textContent, "方向已确认", "Capacity page status label is wrong");
+
 // Global search must find a location and navigate to its detail page.
 const search = doc.querySelector("#search");
 assert.ok(search, "Global search input is missing");
@@ -65,6 +72,13 @@ filter.dispatchEvent(new window.Event("input", { bubbles: true }));
 assert.equal(doc.querySelectorAll("#event-rows .event").length, 1, "Timeline filter should return one matching event");
 assert.ok(content.textContent.includes("无线电中断"), "Filtered event title is missing");
 
+// Global search must route to the capacity review.
+search.value = "运输容量";
+search.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+assert.ok(content.textContent.includes("运输容量设计复盘"), "Search did not find transport capacity review");
+click('#content [data-hit="0"]');
+assert.equal(doc.querySelector("#crumb").textContent, "运输容量", "Capacity search result did not open the review page");
+
 // Global search must also route to the new departure draft.
 search.value = "出发准备";
 search.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
@@ -79,4 +93,4 @@ assert.ok(content.textContent.includes("玩家已经提交了新命令"), "Scena
 
 assert.deepEqual(runtimeErrors, [], `Runtime errors detected: ${runtimeErrors.join(" | ")}`);
 dom.window.close();
-process.stdout.write("PASS: initial render, map layers, global search, timeline filter, scenario selection, departure draft.\n");
+process.stdout.write("PASS: initial render, map layers, global search, timeline filter, scenario selection, departure draft, transport capacity review.\n");

@@ -35,6 +35,10 @@ jobs:
           Path("/tmp/vect-zero-archive.js").write_text("\n".join(scripts), encoding="utf-8")
           PY
           node --check /tmp/vect-zero-archive.js
+      - name: Install isolated DOM test dependency
+        run: npm install --prefix /tmp/vect-zero-test --no-save --no-package-lock jsdom@26
+      - name: Run archive interaction smoke tests
+        run: NODE_PATH=/tmp/vect-zero-test/node_modules node tests/smoke.cjs
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:

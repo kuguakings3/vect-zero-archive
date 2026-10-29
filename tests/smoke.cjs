@@ -53,6 +53,36 @@ assert.ok(content.textContent.includes("容量守恒还没有闭环"), "Capacity
 assert.ok(content.textContent.includes("配置变更时机已明确暂缓"), "Capacity review did not preserve the deferred decision");
 assert.equal(doc.querySelector("#page-status-label").textContent, "方向已确认", "Capacity page status label is wrong");
 
+// Detailed design principles must be expandable, keyboard-semantic, and searchable.
+click('.nav button[data-page="principles"]');
+assert.equal(doc.querySelectorAll("#principle-list details.principle-detail").length, 13, "Design principles page should contain 13 expandable principles");
+assert.ok(content.textContent.includes("为什么需要这条原则"), "Principles page is missing detailed rationale");
+assert.ok(content.textContent.includes("未来如何验证"), "Principles page is missing validation guidance");
+const firstPrinciple = doc.querySelector("#principle-01");
+assert.ok(firstPrinciple && firstPrinciple.querySelector("summary"), "Principle must use a native details/summary disclosure");
+assert.equal(firstPrinciple.open, false, "Principles should start collapsed");
+firstPrinciple.querySelector("summary").click();
+assert.equal(firstPrinciple.open, true, "Clicking a principle summary should expand it");
+firstPrinciple.querySelector("summary").click();
+assert.equal(firstPrinciple.open, false, "Clicking a principle summary should collapse it");
+click('#content [data-principles-toggle="open"]');
+assert.equal(Array.from(doc.querySelectorAll("#principle-list details")).every(d => d.open), true, "Expand all should open every principle");
+click('#content [data-principles-toggle="close"]');
+assert.equal(Array.from(doc.querySelectorAll("#principle-list details")).every(d => !d.open), true, "Collapse all should close every principle");
+
+// Full-text search should navigate to and expand the matching principle.
+search.value = "不能静默删掉人员或物资";
+search.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+assert.ok(content.textContent.includes("指挥官的自动方案必须可理解、可解释"), "Full-text search did not find the principle detail");
+click('#content [data-hit="0"]');
+assert.equal(doc.querySelector("#crumb").textContent, "设计原则", "Principle search result did not open the design manual");
+assert.equal(doc.querySelector("#principle-09").open, true, "Search result did not expand the matching principle");
+
+// Capacity review must link back to the principles manual.
+click('.nav button[data-page="capacity"]');
+click('#content button[data-page="principles"]');
+assert.equal(doc.querySelector("#crumb").textContent, "设计原则", "Capacity review cross-navigation did not open the design manual");
+
 // Global search must find a location and navigate to its detail page.
 const search = doc.querySelector("#search");
 assert.ok(search, "Global search input is missing");
@@ -93,4 +123,4 @@ assert.ok(content.textContent.includes("玩家已经提交了新命令"), "Scena
 
 assert.deepEqual(runtimeErrors, [], `Runtime errors detected: ${runtimeErrors.join(" | ")}`);
 dom.window.close();
-process.stdout.write("PASS: initial render, map layers, global search, timeline filter, scenario selection, departure draft, transport capacity review.\n");
+process.stdout.write("PASS: initial render, map layers, global search, timeline filter, scenario selection, departure draft, transport capacity review, expandable principles, full-text principle search and cross-navigation.\n");

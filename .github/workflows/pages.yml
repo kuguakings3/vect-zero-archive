@@ -54,7 +54,7 @@ jobs:
           set -e
           for attempt in $(seq 1 12); do
             status=$(curl --connect-timeout 5 --max-time 10 -sSL -o /tmp/vect-zero-live.html -w "%{http_code}" https://kuguakings3.github.io/vect-zero-archive/ || true)
-            if [ "$status" = "200" ] && grep -q 'name="archive-build" content="2026-10-29-principles-manual-3"' /tmp/vect-zero-live.html && grep -q 'function principles()' /tmp/vect-zero-live.html && grep -q 'data-principle-id="13"' /tmp/vect-zero-live.html; then
+            if [ "$status" = "200" ] && grep -q 'name="archive-build" content="2026-10-29-principles-manual-3"' /tmp/vect-zero-live.html && grep -q 'function principles()' /tmp/vect-zero-live.html && grep -q 'id:"13",title:' /tmp/vect-zero-live.html; then
               echo "Published site returned HTTP 200 and contains the current design principles manual."
               exit 0
             fi
